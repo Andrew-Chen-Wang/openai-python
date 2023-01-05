@@ -499,7 +499,7 @@ def read_any_format(fname, fields=["prompt", "completion"]):
         if fname.lower().endswith(".txt"):
             immediate_msg = "\n- Based on your file extension, you provided a text file"
             necessary_msg = "Your format `TXT` will be converted to `JSONL`"
-            with open(fname, "r") as f:
+            with open(fname) as f:
                 content = f.read()
                 df = pd.DataFrame(
                     [["", line] for line in content.split("\n")],

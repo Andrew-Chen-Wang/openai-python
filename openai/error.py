@@ -11,7 +11,7 @@ class OpenAIError(Exception):
         headers=None,
         code=None,
     ):
-        super(OpenAIError, self).__init__(message)
+        super().__init__(message)
 
         if http_body and hasattr(http_body, "decode"):
             try:
@@ -35,7 +35,7 @@ class OpenAIError(Exception):
     def __str__(self):
         msg = self._message or "<empty message>"
         if self.request_id is not None:
-            return "Request {0}: {1}".format(self.request_id, msg)
+            return f"Request {self.request_id}: {msg}"
         else:
             return msg
 
@@ -48,12 +48,7 @@ class OpenAIError(Exception):
         return self._message
 
     def __repr__(self):
-        return "%s(message=%r, http_status=%r, request_id=%r)" % (
-            self.__class__.__name__,
-            self._message,
-            self.http_status,
-            self.request_id,
-        )
+        return f"{self.__class__.__name__}(message={self._message!r}, http_status={self.http_status!r}, request_id={self.request_id!r})"
 
     def construct_error_object(self):
         if (
@@ -91,7 +86,7 @@ class APIConnectionError(OpenAIError):
         code=None,
         should_retry=False,
     ):
-        super(APIConnectionError, self).__init__(
+        super().__init__(
             message, http_body, http_status, json_body, headers, code
         )
         self.should_retry = should_retry
@@ -108,20 +103,13 @@ class InvalidRequestError(OpenAIError):
         json_body=None,
         headers=None,
     ):
-        super(InvalidRequestError, self).__init__(
+        super().__init__(
             message, http_body, http_status, json_body, headers, code
         )
         self.param = param
 
     def __repr__(self):
-        return "%s(message=%r, param=%r, code=%r, http_status=%r, " "request_id=%r)" % (
-            self.__class__.__name__,
-            self._message,
-            self.param,
-            self.code,
-            self.http_status,
-            self.request_id,
-        )
+        return f"{self.__class__.__name__}(message={self._message!r}, param={self.param!r}, code={self.code!r}, http_status={self.http_status!r}, request_id={self.request_id!r})"
 
     def __reduce__(self):
         return type(self), (
@@ -157,7 +145,7 @@ class InvalidAPIType(OpenAIError):
 
 class SignatureVerificationError(OpenAIError):
     def __init__(self, message, sig_header, http_body=None):
-        super(SignatureVerificationError, self).__init__(message, http_body)
+        super().__init__(message, http_body)
         self.sig_header = sig_header
 
     def __reduce__(self):

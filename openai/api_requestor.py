@@ -32,7 +32,7 @@ def _build_api_url(url, query):
     scheme, netloc, path, base_query, fragment = urlsplit(url)
 
     if base_query:
-        query = "%s&%s" % (base_query, query)
+        query = f"{base_query}&{query}"
 
     return urlunsplit((scheme, netloc, path, query, fragment))
 
@@ -130,9 +130,9 @@ class APIRequestor:
     def format_app_info(cls, info):
         str = info["name"]
         if info["version"]:
-            str += "/%s" % (info["version"],)
+            str += f"/{info['version']}"
         if info["url"]:
-            str += " (%s)" % (info["url"],)
+            str += f" ({info['url']})"
         return str
 
     @overload
@@ -364,7 +364,7 @@ class APIRequestor:
     def request_headers(
         self, method: str, extra, request_id: Optional[str]
     ) -> Dict[str, str]:
-        user_agent = "OpenAI/v1 PythonBindings/%s" % (version.VERSION,)
+        user_agent = f"OpenAI/v1 PythonBindings/{version.VERSION}"
         if openai.app_info:
             user_agent += " " + self.format_app_info(openai.app_info)
 
@@ -434,7 +434,7 @@ class APIRequestor:
         files,
         request_id: Optional[str],
     ) -> Tuple[str, Dict[str, str], Optional[bytes]]:
-        abs_url = "%s%s" % (self.api_base, url)
+        abs_url = f"{self.api_base}{url}"
         headers = self._validate_headers(supplied_headers)
 
         data = None
@@ -452,9 +452,7 @@ class APIRequestor:
                 headers["Content-Type"] = "application/json"
         else:
             raise error.APIConnectionError(
-                "Unrecognized HTTP method %r. This may indicate a bug in the "
-                "OpenAI bindings. Please contact support@openai.com for "
-                "assistance." % (method,)
+                f"Unrecognized HTTP method {method!r}. This may indicate a bug in the OpenAI bindings. Please contact support@openai.com for assistance."
             )
 
         headers = self.request_headers(method, headers, request_id)

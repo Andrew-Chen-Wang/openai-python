@@ -59,17 +59,15 @@ class APIResource(OpenAIObject):
         # with forward slashes (/), so replace the former with the latter.
         base = cls.OBJECT_NAME.replace(".", "/")  # type: ignore
         if cls.api_prefix:
-            return "/%s/%s" % (cls.api_prefix, base)
-        return "/%s" % (base)
+            return f"/{cls.api_prefix}/{base}"
+        return f"/{base}"
 
     def instance_url(self, operation=None):
         id = self.get("id")
 
         if not isinstance(id, str):
             raise error.InvalidRequestError(
-                "Could not determine which URL to request: %s instance "
-                "has invalid ID: %r, %s. ID should be of type `str` (or"
-                " `unicode`)" % (type(self).__name__, id, type(id)),
+                f"Could not determine which URL to request: {type(self).__name__} instance has invalid ID: {id!r}, {type(id)}. ID should be of type `str` (or `unicode`)",
                 "id",
             )
         api_version = self.api_version or openai.api_version
@@ -83,27 +81,21 @@ class APIResource(OpenAIObject):
 
             if not operation:
                 base = self.class_url()
-                return "/%s%s/%s?api-version=%s" % (
-                    self.azure_api_prefix,
-                    base,
-                    extn,
-                    api_version,
+                return (
+                    f"/{self.azure_api_prefix}{base}/{extn}?api-version={api_version}"
                 )
 
-            return "/%s/%s/%s/%s?api-version=%s" % (
-                self.azure_api_prefix,
-                self.azure_deployments_prefix,
-                extn,
-                operation,
-                api_version,
+            return (
+                f"/{self.azure_api_prefix}/{self.azure_deployments_prefix}/"
+                f"{extn}/{operation}?api-version={api_version}"
             )
 
         elif self.typed_api_type == ApiType.OPEN_AI:
             base = self.class_url()
-            return "%s/%s" % (base, extn)
+            return f"{base}/{extn}"
 
         else:
-            raise error.InvalidAPIType("Unsupported API type %s" % self.api_type)
+            raise error.InvalidAPIType(f"Unsupported API type {self.api_type}")
 
     # The `method_` and `url_` arguments are suffixed with an underscore to
     # avoid conflicting with actual request parameters in `params`.

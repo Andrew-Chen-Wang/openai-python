@@ -22,8 +22,7 @@ def test_file_cli() -> None:
     while True:
         delete_result = subprocess.run(
             ["openai", "api", "files.delete", "-i", file_id],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             encoding="utf-8",
         )
         if delete_result.returncode == 0:

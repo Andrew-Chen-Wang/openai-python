@@ -23,7 +23,7 @@ class OpenAIObject(dict):
         engine=None,
         **params,
     ):
-        super(OpenAIObject, self).__init__()
+        super().__init__()
 
         if response_ms is not None and not isinstance(response_ms, int):
             raise TypeError(f"response_ms is a {type(response_ms).__name__}.")
@@ -47,7 +47,7 @@ class OpenAIObject(dict):
 
     def __setattr__(self, k, v):
         if k[0] == "_" or k in self.__dict__:
-            return super(OpenAIObject, self).__setattr__(k, v)
+            return super().__setattr__(k, v)
 
         self[k] = v
         return None
@@ -62,18 +62,16 @@ class OpenAIObject(dict):
 
     def __delattr__(self, k):
         if k[0] == "_" or k in self.__dict__:
-            return super(OpenAIObject, self).__delattr__(k)
+            return super().__delattr__(k)
         else:
             del self[k]
 
     def __setitem__(self, k, v):
         if v == "":
             raise ValueError(
-                "You cannot set %s to an empty string. "
-                "We interpret empty strings as None in requests."
-                "You may set %s.%s = None to delete the property" % (k, str(self), k)
+                f"You cannot set {k} to an empty string. We interpret empty strings as None in requests.You may set {str(self)}.{k} = None to delete the property"
             )
-        super(OpenAIObject, self).__setitem__(k, v)
+        super().__setitem__(k, v)
 
     def __delitem__(self, k):
         raise NotImplementedError("del is not supported")
@@ -146,7 +144,7 @@ class OpenAIObject(dict):
         # Wipe old state before setting new.
         self.clear()
         for k, v in values.items():
-            super(OpenAIObject, self).__setitem__(
+            super().__setitem__(
                 k, util.convert_to_openai_object(v, api_key, api_version, organization)
             )
 
@@ -266,13 +264,9 @@ class OpenAIObject(dict):
             ident_parts.append(obj)
 
         if isinstance(self.get("id"), str):
-            ident_parts.append("id=%s" % (self.get("id"),))
+            ident_parts.append(f"id={self.get('id')}")
 
-        unicode_repr = "<%s at %s> JSON: %s" % (
-            " ".join(ident_parts),
-            hex(id(self)),
-            str(self),
-        )
+        unicode_repr = f"<{' '.join(ident_parts)} at {hex(id(self))}> JSON: {str(self)}"
 
         return unicode_repr
 

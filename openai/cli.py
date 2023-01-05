@@ -35,7 +35,7 @@ class bcolors:
 def organization_info(obj):
     organization = getattr(obj, "organization", None)
     if organization is not None:
-        return "[organization={}] ".format(organization)
+        return f"[organization={organization}] "
     else:
         return ""
 
@@ -48,14 +48,12 @@ def display(obj):
 
 def display_error(e):
     extra = (
-        " (HTTP status code: {})".format(e.http_status)
+        f" (HTTP status code: {e.http_status})"
         if e.http_status is not None
         else ""
     )
     sys.stderr.write(
-        "{}{}Error:{} {}{}\n".format(
-            organization_info(e), bcolors.FAIL, bcolors.ENDC, e, extra
-        )
+        f"{organization_info(e)}{bcolors.FAIL}Error:{bcolors.ENDC} {e}{extra}\n"
     )
 
 
@@ -99,7 +97,7 @@ class Engine:
             completions = len(part["data"])
             for c_idx, c in enumerate(part["data"]):
                 if completions > 1:
-                    sys.stdout.write("===== Completion {} =====\n".format(c_idx))
+                    sys.stdout.write(f"===== Completion {c_idx} =====\n")
                 sys.stdout.write("".join(c["text"]))
                 if completions > 1:
                     sys.stdout.write("\n")
@@ -130,7 +128,7 @@ class Engine:
             args.documents if args.documents else [x["text"] for x in resp["data"]]
         )
         for score, document_idx in scores:
-            print("=== score {:.3f} ===".format(score))
+            print(f"=== score {score:.3f} ===")
             print(dataset[document_idx])
             if (
                 args.return_metadata
@@ -176,7 +174,7 @@ class Completion:
             choices = part["choices"]
             for c_idx, c in enumerate(sorted(choices, key=lambda s: s["index"])):
                 if len(choices) > 1:
-                    sys.stdout.write("===== Completion {} =====\n".format(c_idx))
+                    sys.stdout.write(f"===== Completion {c_idx} =====\n")
                 sys.stdout.write(c["text"])
                 if len(choices) > 1:
                     sys.stdout.write("\n")
@@ -357,12 +355,7 @@ class FineTune:
             if len(matching_files) > 0:
                 file_ids = [f["id"] for f in matching_files]
                 sys.stdout.write(
-                    "Found potentially duplicated files with name '{name}', purpose 'fine-tune' and size {size} bytes\n".format(
-                        name=os.path.basename(matching_files[0]["filename"]),
-                        size=matching_files[0]["bytes"]
-                        if "bytes" in matching_files[0]
-                        else matching_files[0]["size"],
-                    )
+                    f"Found potentially duplicated files with name '{os.path.basename(matching_files[0]['filename'])}', purpose 'fine-tune' and size {matching_files[0]['bytes'] if 'bytes' in matching_files[0] else matching_files[0]['size']} bytes\n"
                 )
                 sys.stdout.write("\n".join(file_ids))
                 while True:
@@ -372,16 +365,14 @@ class FineTune:
                     inp = sys.stdin.readline().strip()
                     if inp in file_ids:
                         sys.stdout.write(
-                            "Reusing already uploaded file: {id}\n".format(id=inp)
+                            f"Reusing already uploaded file: {inp}\n"
                         )
                         return inp
                     elif inp == "":
                         break
                     else:
                         sys.stdout.write(
-                            "File id '{id}' is not among the IDs of the potentially duplicated files\n".format(
-                                id=inp
-                            )
+                            f"File id '{inp}' is not among the IDs of the potentially duplicated files\n"
                         )
 
         buffer_reader = BufferReader(content, desc="Upload progress")
@@ -391,9 +382,7 @@ class FineTune:
             user_provided_filename=user_provided_file or file,
         )
         sys.stdout.write(
-            "Uploaded file from {file}: {id}\n".format(
-                file=user_provided_file or file, id=resp["id"]
-            )
+            f"Uploaded file from {user_provided_file or file}: {resp['id']}\n"
         )
         return resp["id"]
 
@@ -456,11 +445,7 @@ class FineTune:
             return
 
         sys.stdout.write(
-            "Created fine-tune: {job_id}\n"
-            "Streaming events until fine-tuning is complete...\n\n"
-            "(Ctrl-C will interrupt the stream, but not cancel the fine-tune)\n".format(
-                job_id=resp["id"]
-            )
+            f"Created fine-tune: {resp['id']}\nStreaming events until fine-tuning is complete...\n\n(Ctrl-C will interrupt the stream, but not cancel the fine-tune)\n"
         )
         cls._stream_events(resp["id"])
 
@@ -485,9 +470,7 @@ class FineTune:
         if args.stream:
             raise openai.error.OpenAIError(
                 message=(
-                    "The --stream parameter is deprecated, use fine_tunes.follow "
-                    "instead:\n\n"
-                    "  openai api fine_tunes.follow -i {id}\n".format(id=args.id)
+                    f"The --stream parameter is deprecated, use fine_tunes.follow instead:\n\n  openai api fine_tunes.follow -i {args.id}\n"
                 ),
             )
 
@@ -520,19 +503,13 @@ class FineTune:
         try:
             for event in events:
                 sys.stdout.write(
-                    "[%s] %s"
-                    % (
-                        datetime.datetime.fromtimestamp(event["created_at"]),
-                        event["message"],
-                    )
+                    f"[{datetime.datetime.fromtimestamp(event['created_at'])}] {event['message']}"
                 )
                 sys.stdout.write("\n")
                 sys.stdout.flush()
         except Exception:
             sys.stdout.write(
-                "\nStream interrupted (client disconnected).\n"
-                "To resume the stream, run:\n\n"
-                "  openai api fine_tunes.follow -i {job_id}\n\n".format(job_id=job_id)
+                f"\nStream interrupted (client disconnected).\nTo resume the stream, run:\n\n  openai api fine_tunes.follow -i {job_id}\n\n"
             )
             return
 
@@ -541,10 +518,7 @@ class FineTune:
         if status == "succeeded":
             sys.stdout.write("\nJob complete! Status: succeeded 🎉")
             sys.stdout.write(
-                "\nTry out your fine-tuned model:\n\n"
-                "openai api completions.create -m {model} -p <YOUR_PROMPT>".format(
-                    model=resp["fine_tuned_model"]
-                )
+                f"\nTry out your fine-tuned model:\n\nopenai api completions.create -m {resp['fine_tuned_model']} -p <YOUR_PROMPT>"
             )
         elif status == "failed":
             sys.stdout.write(

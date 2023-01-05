@@ -31,10 +31,9 @@ def test_long_examples_validator() -> None:
 
         prepared_data_cmd_output = subprocess.run(
             [f"openai tools fine_tunes.prepare_data -f {training_data.name}"],
-            stdout=subprocess.PIPE,
+            capture_output=True,
             text=True,
-            input="y\ny\ny\ny\ny",  # apply all recommendations, one at a time
-            stderr=subprocess.PIPE,
+            input="y\ny\ny\ny\ny",
             encoding="utf-8",
             shell=True,
         )

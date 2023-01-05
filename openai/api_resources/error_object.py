@@ -18,7 +18,7 @@ class ErrorObject(OpenAIObject):
         # error objects when they have a null value. We manually set default
         # values here to facilitate generic error handling.
         values = merge_dicts({"message": None, "type": None}, values)
-        return super(ErrorObject, self).refresh_from(
+        return super().refresh_from(
             values=values,
             api_key=api_key,
             api_version=api_version,

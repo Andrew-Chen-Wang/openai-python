@@ -50,7 +50,7 @@ class Engine(ListableAPIResource, UpdateableAPIResource):
         elif self.typed_api_type == ApiType.OPEN_AI:
             return self.request("post", self.instance_url() + "/search", params)
         else:
-            raise InvalidAPIType("Unsupported API type %s" % self.api_type)
+            raise InvalidAPIType(f"Unsupported API type {self.api_type}")
 
     def asearch(self, **params):
         if self.typed_api_type in (ApiType.AZURE, ApiType.AZURE_AD):
@@ -58,7 +58,7 @@ class Engine(ListableAPIResource, UpdateableAPIResource):
         elif self.typed_api_type == ApiType.OPEN_AI:
             return self.arequest("post", self.instance_url() + "/search", params)
         else:
-            raise InvalidAPIType("Unsupported API type %s" % self.api_type)
+            raise InvalidAPIType(f"Unsupported API type {self.api_type}")
 
     def embeddings(self, **params):
         warnings.warn(

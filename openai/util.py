@@ -86,7 +86,7 @@ def logfmt(props):
         # key should already be a string
         if re.search(r"\s", key):
             key = repr(key)
-        return "{key}={val}".format(key=key, val=val)
+        return f"{key}={val}"
 
     return " ".join([fmt(key, val) for key, val in sorted(props.items())])
 
@@ -175,7 +175,7 @@ def merge_dicts(x, y):
 
 def default_api_key() -> str:
     if openai.api_key_path:
-        with open(openai.api_key_path, "rt") as k:
+        with open(openai.api_key_path) as k:
             api_key = k.read().strip()
             if not api_key.startswith("sk-"):
                 raise ValueError(f"Malformed API key in {openai.api_key_path}.")
